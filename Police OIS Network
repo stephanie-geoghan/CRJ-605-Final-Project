@@ -1,0 +1,36 @@
+# clear workspace and load libraries
+
+rm( list = ls() )
+
+library( here )    # for accessing local directory
+library( dplyr )   # for working with the data
+library( network ) # for building the networks
+library( sna )     # for working with the network data
+
+
+# ----
+# Download the arrest data from the portal
+
+url <- paste(
+  "https://www.phoenixopendata.com/dataset/754b1156-a48f-4d1b-b17a-53bd96d5b2be/resource/",
+  "dd5431ca-21f3-48fd-8404-4c1c77cae593/download/ois_ois-officer-summary_oisofficer.csv",
+  sep = ""
+  )
+
+dat <- read.csv(
+  url, 
+  as.is = TRUE,
+  header = TRUE
+)
+
+
+# ----
+# check the variables
+names( dat )
+
+
+# ----
+# check the counts of duplicate incident ids
+table( table( dat$INC_RPT ) )
+
+# this shows that there are multiple incidents that involve several officers
