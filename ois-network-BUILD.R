@@ -38,26 +38,33 @@ names( dat )
 # check the counts of duplicate incident ids
 table( table( dat$INC_RPT ) )
 
-# this shows that there are multiple incidents that involve several officers
-
 
 # ----
 # construct the network objects
 
 dat.ois <- dat %>% 
-  select( INC_RPT, REFERENCE_ID, PO_GENDER ) %>%  # keep the variables you need for the edgelist
-  group_by( INC_RPT ) %>%                         # group by incident report
-  filter( n() > 1 )  %>%                          # only keep cases that involve more than 1 person arrested
-  ungroup()
-  
+  select( INC_RPT, REFERENCE_ID, PO_GENDER, OIS_YEAR ) %>%  # keep the variables you need for the edgelist
+  group_by( INC_RPT ) %>%                                   # group by incident report
+  filter( OIS_YEAR >= 2019 ) %>%                            # select cases that are at 2019 or more
+  filter( n() > 1 ) %>%                                     # only keep cases that involve more than 1 person arrested
+  ungroup() %>%                                             # ungroup the data
+  na.omit()                                                 # drop a case missing an officer id
+
+
+# ----
+# create the actor and event as characters
+
 dat.ois <- dat.ois %>% 
   mutate( actor = paste0( "a.", dat.ois$REFERENCE_ID ) ) %>%  # change to character
   mutate( event = paste0( "p.", dat.ois$INC_RPT ) )           # change to character
 
-  
+
+# ----
+# create the edgelist  
+
 dat.edgelist <- dat.ois %>% 
-  select( actor, event ) %>% 
-  arrange( actor, event )   
+  select( actor, event ) %>%  # take the actor and event 
+  arrange( actor )            # sort by the actor
 
 
 # ----
@@ -82,10 +89,11 @@ n.events
 # construct the network
 
 # build the edgelist
-mat.edgelist <- cbind(                                                   
-  as.character( dat.edgelist$actor ),                                    
-  as.character( dat.edgelist$event )                                     
-)
+mat.edgelist <- cbind( 
+  dat.edgelist$actor, 
+  dat.edgelist$event 
+  )
+
 
 # create the network
 netOIS <- as.network(                             
@@ -101,14 +109,9 @@ netOIS <- as.network(
 # create the attributes object
 dat.attrs <- dat.ois %>% 
   select( actor, PO_GENDER ) %>% 
-  group_by( actor ) %>% 
-  filter( n() == 1 )  %>%
+  group_by( actor ) %>%
+  distinct() %>% 
   arrange( actor )
-
-
-
-!!!here: stuck with trying to figure out a duplicate it
-
 
 
 # check names match 
@@ -138,7 +141,7 @@ netOIS %v% "gender" <- gender
 col.gender <- netOIS %v% "gender"
 col.gender[ netOIS %v% "gender" == "Male" ] <- "lightblue"
 col.gender[ netOIS %v% "gender" == "Female" ] <- "#fc03c2"
-col.gender[ netOIS %v% "gender" == "NA" ] <- "black"
+col.gender[ is.na( netOIS %v% "gender") ] <- "black"
 
 
 # plot it
@@ -146,9 +149,10 @@ gplot( netOIS,
        gmode = "twomode",
        usearrows = FALSE,
        vertex.col = col.gender,
-       edge.col = "grey60"
+       edge.col = "grey60",
+       main = "OIS Incidents Network\n (color reflects gender)"
 )
 
 
-
+### NOW, NEED TO ADD THE CODE TO INTEGRATE THE ADDITIONAL DATA
 
