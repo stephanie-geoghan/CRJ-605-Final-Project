@@ -11,8 +11,8 @@ library( here )    # for accessing local directory
 library( dplyr )   # for working with the data
 library( network ) # for building the networks
 library( sna )     # for working with the network data
-
-
+library( readxl )  # for reading excel files
+ 
 # ----
 # Download the arrest data from the portal
 
@@ -155,4 +155,21 @@ gplot( netOIS,
 
 
 ### NOW, NEED TO ADD THE CODE TO INTEGRATE THE ADDITIONAL DATA
+
+dat2 <- read_xlsx( here( "OIS-DATA-CLEAN.xlsx" ) )
+
+# Waiting on Stephanie to finish cleaning the file
+
+
+
+
+
+
+
+
+
+
+
+
+
 
