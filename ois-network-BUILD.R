@@ -154,11 +154,43 @@ gplot( netOIS,
 )
 
 
-### NOW, NEED TO ADD THE CODE TO INTEGRATE THE ADDITIONAL DATA
+# ----
+# Integrate hand cleaned data file
 
-dat2 <- read_xlsx( here( "OIS-DATA-CLEAN.xlsx" ) )
+dat2 <- read_xlsx( 
+  here( "OIS-DATA-EDITED.xlsx" ), # call the local directory
+  na = "NA"                       # set character for missing values
+  )
 
-# Waiting on Stephanie to finish cleaning the file
+# check the variables
+names( dat2 )
+
+# check the counts of duplicate incident ids
+table( table( dat2$INC_RPT ) )
+
+
+# ----
+# clean the 
+
+
+# ----
+# construct the network objects
+
+dat.ois2 <- dat2 %>% 
+  select( INC_RPT, REFERENCE_ID, PO_GENDER ) %>%  # keep the variables you need for the edgelist
+  group_by( INC_RPT ) %>%                         # group by incident report
+  filter( n() > 1 ) %>%                           # only keep cases that involve more than 1 person arrested
+  ungroup() 
+
+
+# check missing ids
+table( is.na( dat.ois2$REFERENCE_ID ) )
+
+# drop 32 cases with missing ids
+dat.ois2 <- dat.ois2 %>% 
+  na.omit()
+
+
 
 
 
